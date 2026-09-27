@@ -666,14 +666,13 @@
                   </td>
                   <td class="text-end">
                     <div class="btn-group">
-                      <button
-                        @click="
-                          otvoriUrediModal(k)
-                        "
-                        class="btn btn-sm btn-outline-primary"
+                     <button
+                    v-if="jeSuperAdmin || ulogaKorisnika(k) !== 'Super Administrator'"
+                    @click="otvoriUrediModal(k)"
+                    class="btn btn-sm btn-outline-primary"
                       >
-                        Uredi
-                      </button>
+                         Uredi
+                    </button>
                       <button
                         v-if="
                           ulogaKorisnika(k) !== 'Admin' &&
