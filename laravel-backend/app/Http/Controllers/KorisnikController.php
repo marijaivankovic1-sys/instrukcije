@@ -86,6 +86,14 @@ class KorisnikController extends Controller
 
         return true;
     }
+    private function jeSuperAdministrator(int $korisnikId): bool
+{
+    return DB::table('korisnik_uloga')
+        ->join('uloge', 'korisnik_uloga.uloga_id', '=', 'uloge.id')
+        ->where('korisnik_uloga.korisnik_id', $korisnikId)
+        ->where('uloge.naziv', 'Super Administrator')
+        ->exists();
+}
 
     /*
     |--------------------------------------------------------------------------
@@ -383,6 +391,19 @@ class KorisnikController extends Controller
                 'message' => 'Korisnik nije pronađen.'
             ], 404);
         }
+
+        if ($this->jeSuperAdministrator((int) $id)) {
+    $prijavljeniId = $this->prijavljeniKorisnikId($request);
+
+    if (
+        !$prijavljeniId ||
+        !$this->jeSuperAdministrator($prijavljeniId)
+    ) {
+        return response()->json([
+            'message' => 'Super Administratora može uređivati samo Super Administrator.'
+        ], 403);
+    }
+}
 
         $podaci = [];
         $novaUloga = null;
