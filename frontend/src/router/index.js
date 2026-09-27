@@ -14,25 +14,74 @@ import KosaricaView from '../views/KosaricaView.vue'
 import AdminZbirkeView from '../views/AdminZbirkeView.vue'
 
 const routes = [
-
-  {path: '/',name: 'Home',component: HomeView},
-  {path: '/termini', name: 'Termini',component: TerminiView},
-  {path: '/recenzije', name: 'Recenzije', component: RecenzijeView},
-  {path: '/login', name: 'Login', component: LoginView},
-  {path: '/register', name: 'Register', component: RegisterView},
-  {path: '/moje-rezervacije', name: 'MojeRezervacije', component: MojeRezervacijeView},
-  {path: '/zahtjevi', name: 'PristigliZahtjevi', component: PristigliZahtjeviView},
-  {path: '/dodaj-termin',name: 'DodajTermin', component: DodajTerminView},
-  {path: '/admin',name: 'Admin', component: AdminView},
-  {path: '/vizija',name: 'vision',component: () => import('../views/VisionView.vue')},
-  {path: '/zbirke',name: 'zbirke',component: ZbirkeView},
-  {path: '/kosarica',name: 'kosarica',component: KosaricaView},
-  {path: '/admin-zbirke',name: 'admin-zbirke',component: AdminZbirkeView,
+  {
+    path: '/',
+    name: 'Home',
+    component: HomeView
+  },
+  {
+    path: '/termini',
+    name: 'Termini',
+    component: TerminiView
+  },
+  {
+    path: '/recenzije',
+    name: 'Recenzije',
+    component: RecenzijeView
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: LoginView
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: RegisterView
+  },
+  {
+    path: '/moje-rezervacije',
+    name: 'MojeRezervacije',
+    component: MojeRezervacijeView
+  },
+  {
+    path: '/zahtjevi',
+    name: 'PristigliZahtjevi',
+    component: PristigliZahtjeviView
+  },
+  {
+    path: '/dodaj-termin',
+    name: 'DodajTermin',
+    component: DodajTerminView
+  },
+  {
+    path: '/admin',
+    name: 'Admin',
+    component: AdminView
+  },
+  {
+    path: '/vizija',
+    name: 'vision',
+    component: () => import('../views/VisionView.vue')
+  },
+  {
+    path: '/zbirke',
+    name: 'zbirke',
+    component: ZbirkeView
+  },
+  {
+    path: '/kosarica',
+    name: 'kosarica',
+    component: KosaricaView
+  },
+  {
+    path: '/admin-zbirke',
+    name: 'admin-zbirke',
+    component: AdminZbirkeView,
     meta: {
       requiresAdmin: true
     }
   }
-
 ]
 
 const router = createRouter({
@@ -40,13 +89,11 @@ const router = createRouter({
   routes
 })
 
-
 // ======================================================
 // ZAŠTITA ADMIN RUTA
 // ======================================================
 
 router.beforeEach((to, from, next) => {
-
   const podaci =
     localStorage.getItem('korisnik') ||
     localStorage.getItem('user')
@@ -54,13 +101,9 @@ router.beforeEach((to, from, next) => {
   let korisnik = null
 
   if (podaci) {
-
     try {
-
       korisnik = JSON.parse(podaci)
-
     } catch (error) {
-
       console.error(
         'Greška pri čitanju korisnika:',
         error
@@ -70,28 +113,36 @@ router.beforeEach((to, from, next) => {
     }
   }
 
-
   const uloga = (
     korisnik?.uloga ||
     korisnik?.role ||
     ''
-  ).toLowerCase()
+  )
+    .toString()
+    .trim()
+    .toLowerCase()
 
+  // Admin rute mogu otvoriti:
+  // Admin i Super Administrator
+  const jeAdmin =
+    uloga === 'admin' ||
+    uloga === 'administrator'
 
-  // Ako ruta zahtijeva admina,
-  // a korisnik nije admin
+  const jeSuperAdmin =
+    uloga === 'super administrator' ||
+    uloga === 'superadmin' ||
+    uloga === 'super admin'
+
   if (
     to.meta.requiresAdmin &&
-    uloga !== 'admin'
+    !jeAdmin &&
+    !jeSuperAdmin
   ) {
-
     next('/')
     return
   }
 
-
   next()
 })
-
 
 export default router

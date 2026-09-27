@@ -1,4 +1,25 @@
+# Vue / Node
 node_modules/
-.env
+frontend/node_modules/
+frontend/dist/
+
+# Laravel
+laravel-backend/vendor/
+laravel-backend/.env
+
+# Korisnički uploadi
+laravel-backend/public/uploads/
+
+# Logovi
 *.log
+
+# Stari backend
 backend/
+
+# VS Code
+.vscode/
+frontend/.vscode/
+
+# Windows / macOS
+Thumbs.db
+.DS_Store

@@ -67,7 +67,7 @@
               </router-link>
             </li>
 
-            <!-- TUTOR / ADMIN -->
+            <!-- TUTOR / ADMIN / SUPER ADMIN -->
             <li v-if="jeInstruktorIliAdmin" class="nav-item">
               <router-link class="nav-link" to="/zahtjevi">
                 Pristigli zahtjevi
@@ -80,14 +80,14 @@
               </router-link>
             </li>
 
-            <!-- ADMIN -->
-            <li v-if="jeAdmin" class="nav-item">
+            <!-- ADMIN / SUPER ADMIN -->
+            <li v-if="jeAdminIliSuperAdmin" class="nav-item">
               <router-link class="nav-link" to="/admin">
                 Upravljačka ploča
               </router-link>
             </li>
 
-            <li v-if="jeAdmin" class="nav-item">
+            <li v-if="jeAdminIliSuperAdmin" class="nav-item">
               <router-link class="nav-link" to="/admin-zbirke">
                 Upravljanje zbirkama
               </router-link>
@@ -182,6 +182,13 @@ export default {
     },
 
     prikazUloge() {
+
+      // Važno: Super Administrator provjeravamo
+      // prije običnog administratora.
+      if (this.jeSuperAdmin) {
+        return 'Super Administrator'
+      }
+
       if (this.jeInstruktor) {
         return 'Tutor'
       }
@@ -219,13 +226,31 @@ export default {
     jeAdmin() {
       return (
         this.uloga === 'admin' ||
-        this.uloga === 'administrator' ||
-        this.uloga === 'super administrator'
+        this.uloga === 'administrator'
+      )
+    },
+
+    jeSuperAdmin() {
+      return (
+        this.uloga === 'super administrator' ||
+        this.uloga === 'superadmin' ||
+        this.uloga === 'super admin'
+      )
+    },
+
+    jeAdminIliSuperAdmin() {
+      return (
+        this.jeAdmin ||
+        this.jeSuperAdmin
       )
     },
 
     jeInstruktorIliAdmin() {
-      return this.jeInstruktor || this.jeAdmin
+      return (
+        this.jeInstruktor ||
+        this.jeAdmin ||
+        this.jeSuperAdmin
+      )
     }
 
   },
@@ -255,6 +280,7 @@ export default {
       try {
         this.korisnik = JSON.parse(podaci)
       } catch (e) {
+
         console.error(
           'Greška pri učitavanju korisnika:',
           e
@@ -323,5 +349,68 @@ export default {
 <style scoped>
 .main-navbar {
   background-color: #0d3b5f !important;
+}
+
+/* Navbar koristi više širine ekrana */
+.main-navbar .container {
+  max-width: 1650px;
+}
+
+/* Logo se ne prelama */
+.navbar-brand {
+  white-space: nowrap;
+  margin-right: 1.2rem;
+}
+
+/* Navigacijske stavke */
+.navbar-nav {
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+.navbar-nav .nav-item {
+  white-space: nowrap;
+}
+
+.navbar-nav .nav-link {
+  white-space: nowrap;
+  padding-left: 0.55rem;
+  padding-right: 0.55rem;
+  font-size: 0.95rem;
+}
+
+/* Desni dio - korisnik i odjava */
+.navbar-collapse > .d-flex {
+  white-space: nowrap;
+  margin-left: 1rem;
+}
+
+.navbar-collapse > .d-flex > span {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* Badge uloge */
+.badge {
+  white-space: nowrap;
+}
+
+/* Gumb Odjavi se */
+.btn {
+  white-space: nowrap;
+}
+
+/* Na manjim ekranima vraćamo normalni mobilni prikaz */
+@media (max-width: 991.98px) {
+  .navbar-nav {
+    align-items: flex-start;
+  }
+
+  .navbar-collapse > .d-flex {
+    margin-left: 0;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
 }
 </style>

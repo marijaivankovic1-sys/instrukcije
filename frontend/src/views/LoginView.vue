@@ -1,6 +1,7 @@
 <template>
   <div class="row justify-content-center">
     <div class="col-md-6 col-lg-5">
+
       <div class="card shadow-sm border-0 mt-4">
         <div class="card-body p-4">
 
@@ -8,6 +9,7 @@
             Prijava na sustav
           </h3>
 
+          <!-- GREŠKA -->
           <div
             v-if="greska"
             class="alert alert-danger"
@@ -16,6 +18,7 @@
             {{ greska }}
           </div>
 
+          <!-- FORMA ZA PRIJAVU -->
           <form @submit.prevent="prijava">
 
             <div class="mb-3">
@@ -73,14 +76,17 @@
 
         </div>
       </div>
+
     </div>
   </div>
 </template>
+
 
 <script>
 import { API_BASE_URL } from '@/config/api'
 
 export default {
+
   name: 'LoginView',
 
   data() {
@@ -96,19 +102,24 @@ export default {
   },
 
   methods: {
+
     async prijava() {
+
       this.greska = ''
       this.ucitavanje = true
 
       try {
+
         const response = await fetch(
           `${API_BASE_URL}/prijava`,
           {
             method: 'POST',
+
             credentials: 'include',
 
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              Accept: 'application/json'
             },
 
             body: JSON.stringify(this.forma)
@@ -117,21 +128,29 @@ export default {
 
         const data = await response.json()
 
-        if (data.uspjeh) {
+        if (
+          response.ok &&
+          data.uspjeh
+        ) {
+
           localStorage.setItem(
             'korisnik',
             JSON.stringify(data.korisnik)
           )
 
           this.$router.push('/')
+
         } else {
+
           this.greska =
+            data.message ||
             data.poruka ||
             data.messages?.error ||
             'Neispravni podaci za prijavu.'
         }
 
       } catch (err) {
+
         console.error(
           'Greška pri prijavi:',
           err
@@ -141,9 +160,11 @@ export default {
           'Došlo je do greške prilikom povezivanja s poslužiteljem.'
 
       } finally {
+
         this.ucitavanje = false
       }
     }
+
   }
 }
 </script>

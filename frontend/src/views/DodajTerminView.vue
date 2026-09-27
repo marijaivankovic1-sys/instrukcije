@@ -3,11 +3,17 @@
     <div class="row justify-content-center">
       <div class="col-md-8 col-lg-6">
         <div class="card shadow-sm border-0 p-4">
-          <h3 class="mb-4 text-center fw-bold">Dodaj novi termin</h3>
+
+          <h3 class="mb-4 text-center fw-bold">
+            Dodaj novi termin
+          </h3>
 
           <div
             v-if="poruka"
-            :class="['alert', greska ? 'alert-danger' : 'alert-success']"
+            :class="[
+              'alert',
+              greska ? 'alert-danger' : 'alert-success'
+            ]"
             role="alert"
           >
             {{ poruka }}
@@ -15,9 +21,11 @@
 
           <form @submit.prevent="spremiTermin">
 
-            <!-- Prikaz polja s imenom kada je prijavljen Instruktor / Tutor -->
+            <!-- TUTOR -->
             <div v-if="jeInstruktor" class="mb-3">
-              <label class="form-label fw-semibold">Instruktor:</label>
+              <label class="form-label fw-semibold">
+                Instruktor:
+              </label>
 
               <input
                 type="text"
@@ -27,7 +35,7 @@
               />
             </div>
 
-            <!-- Prikaz padajućeg izbornika samo ako je Admin -->
+            <!-- ADMIN / SUPER ADMIN -->
             <div v-else class="mb-3">
               <label class="form-label fw-semibold">
                 Odaberi instruktora:
@@ -52,9 +60,11 @@
               </select>
             </div>
 
-            <!-- Predmet -->
+            <!-- PREDMET -->
             <div class="mb-3">
-              <label class="form-label fw-semibold">Predmet:</label>
+              <label class="form-label fw-semibold">
+                Predmet:
+              </label>
 
               <select
                 v-model="noviTermin.predmet_id"
@@ -75,9 +85,11 @@
               </select>
             </div>
 
-            <!-- DATEPICKER -->
+            <!-- DATUM -->
             <div class="mb-3">
-              <label class="form-label fw-semibold">Datum:</label>
+              <label class="form-label fw-semibold">
+                Datum:
+              </label>
 
               <VueDatePicker
                 v-model="odabraniDatum"
@@ -90,7 +102,7 @@
               />
             </div>
 
-            <!-- Vrijeme -->
+            <!-- VRIJEME -->
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="form-label fw-semibold">
@@ -119,7 +131,7 @@
               </div>
             </div>
 
-            <!-- Cijena -->
+            <!-- CIJENA -->
             <div class="mb-3">
               <label class="form-label fw-semibold">
                 Cijena (BAM):
@@ -135,7 +147,7 @@
               />
             </div>
 
-            <!-- WYSIWYG EDITOR -->
+            <!-- WYSIWYG -->
             <div class="mb-4">
               <label class="form-label fw-semibold">
                 Napomena:
@@ -158,6 +170,7 @@
                   : 'Spremi termin'
               }}
             </button>
+
           </form>
         </div>
       </div>
@@ -191,7 +204,11 @@ export default {
   data() {
     return {
       jeInstruktor: false,
+
       prijavljeniIme: '',
+      prijavljeniId: null,
+      prijavljenaUloga: '',
+
       instruktori: [],
       predmeti: [],
 
@@ -221,6 +238,7 @@ export default {
   },
 
   methods: {
+
     async procitajJson(res) {
       try {
         return await res.json()
@@ -245,6 +263,7 @@ export default {
       }
 
       const godina = datum.getFullYear()
+
       const mjesec = String(
         datum.getMonth() + 1
       ).padStart(2, '0')
@@ -354,9 +373,15 @@ export default {
           k.korisnik_id ||
           k.user_id
 
+        this.prijavljeniId = korisnikId
+        this.prijavljenaUloga = uloga
+
         this.prijavljeniIme =
           `${k.ime || ''} ${k.prezime || ''}`.trim()
 
+        /*
+         * Obični Tutor dodaje termin samo sebi.
+         */
         if (
           uloga === 'instruktor' ||
           uloga === 'tutor'
@@ -365,6 +390,10 @@ export default {
           this.noviTermin.tutor_id =
             korisnikId
         } else {
+          /*
+           * Admin i Super Administrator
+           * dobivaju padajući izbornik.
+           */
           this.jeInstruktor = false
           this.ucitajInstruktore()
         }
@@ -390,11 +419,13 @@ export default {
 
         if (!res.ok) {
           this.instruktori = []
+
           this.poruka =
             this.porukaGreske(
               data,
               'Instruktore nije moguće dohvatiti.'
             )
+
           this.greska = true
           return
         }
@@ -408,22 +439,85 @@ export default {
                 : []
             )
 
-        this.instruktori =
-          korisnici.filter(k => {
-            const uloga = (
-              k?.uloga ||
-              k?.role ||
-              ''
-            ).toString().trim().toLowerCase()
+        /*
+         * SUPER ADMINISTRATOR:
+         * može dodati termin:
+         * - Tutoru
+         * - Instruktoru
+         * - Adminu
+         * - sebi kao Super Administratoru
+         */
+        if (
+          this.prijavljenaUloga ===
+            'super administrator' ||
+          this.prijavljenaUloga ===
+            'superadmin' ||
+          this.prijavljenaUloga ===
+            'super admin'
+        ) {
+          this.instruktori =
+            korisnici.filter(k => {
+              const uloga = (
+                k?.uloga ||
+                k?.role ||
+                ''
+              )
+                .toString()
+                .trim()
+                .toLowerCase()
 
-         return (
-  uloga === 'tutor' ||
-  uloga === 'instruktor' ||
-  uloga === 'admin' ||
-  uloga === 'administrator' ||
-  uloga === 'super administrator'
-)
-          })
+              return (
+                uloga === 'tutor' ||
+                uloga === 'instruktor' ||
+                uloga === 'admin' ||
+                uloga === 'administrator' ||
+                uloga === 'super administrator' ||
+                uloga === 'superadmin' ||
+                uloga === 'super admin'
+              )
+            })
+
+          return
+        }
+
+        /*
+         * ADMIN:
+         * može dodati termin:
+         * - Tutoru
+         * - Instruktoru
+         * - sebi / drugom Adminu
+         *
+         * Ne može dodavati termin
+         * Super Administratoru.
+         */
+        if (
+          this.prijavljenaUloga === 'admin' ||
+          this.prijavljenaUloga ===
+            'administrator'
+        ) {
+          this.instruktori =
+            korisnici.filter(k => {
+              const uloga = (
+                k?.uloga ||
+                k?.role ||
+                ''
+              )
+                .toString()
+                .trim()
+                .toLowerCase()
+
+              return (
+                uloga === 'tutor' ||
+                uloga === 'instruktor' ||
+                uloga === 'admin' ||
+                uloga === 'administrator'
+              )
+            })
+
+          return
+        }
+
+        this.instruktori = []
 
       } catch (err) {
         console.error(
@@ -432,8 +526,10 @@ export default {
         )
 
         this.instruktori = []
+
         this.poruka =
           'Greška pri povezivanju s poslužiteljem.'
+
         this.greska = true
       }
     },
@@ -478,6 +574,7 @@ export default {
       if (!this.noviTermin.tutor_id) {
         this.poruka =
           'Molimo odaberite instruktora.'
+
         this.greska = true
         return
       }
@@ -485,6 +582,7 @@ export default {
       if (!this.noviTermin.predmet_id) {
         this.poruka =
           'Molimo odaberite predmet.'
+
         this.greska = true
         return
       }
@@ -492,6 +590,7 @@ export default {
       if (!this.noviTermin.datum) {
         this.poruka =
           'Molimo odaberite datum termina.'
+
         this.greska = true
         return
       }
@@ -502,6 +601,7 @@ export default {
       ) {
         this.poruka =
           'Molimo unesite vrijeme početka i završetka.'
+
         this.greska = true
         return
       }
@@ -512,6 +612,7 @@ export default {
       ) {
         this.poruka =
           'Vrijeme završetka mora biti nakon vremena početka.'
+
         this.greska = true
         return
       }
@@ -567,15 +668,10 @@ export default {
               trenutniTutorId,
 
             predmet_id: '',
-
             datum: '',
-
             vrijeme_od: '',
-
             vrijeme_do: '',
-
             cijena: 20,
-
             opis: ''
           }
 
@@ -584,6 +680,7 @@ export default {
           if (this.quillEditor) {
             this.quillEditor.setText('')
           }
+
         } else {
           this.poruka =
             this.porukaGreske(

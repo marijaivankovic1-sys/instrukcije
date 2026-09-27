@@ -7,7 +7,7 @@
       </h1>
 
       <p class="text-muted">
-        Odaberi zbirku iz željenog predmeta i dodaj je u košaricu.
+        Pregledaj dostupne zbirke riješenih zadataka.
       </p>
     </div>
 
@@ -100,6 +100,7 @@
                 {{ formatirajCijenu(zbirka.cijena) }} KM
               </p>
 
+              <!-- PDF -->
               <a
                 v-if="zbirka.pdf_putanja"
                 :href="urlDatoteke(zbirka.pdf_putanja)"
@@ -109,7 +110,9 @@
                 Pogledaj PDF
               </a>
 
+              <!-- SAMO STUDENT MOŽE DODATI U KOŠARICU -->
               <button
+                v-if="jeStudent"
                 class="btn btn-primary w-100"
                 :disabled="dodavanjeId === Number(zbirka.id)"
                 @click="dodajUKosaricu(zbirka)"
@@ -137,15 +140,11 @@
 
 
 <script>
-import {
-  API_BASE_URL
-} from '@/config/api'
-
+import { API_BASE_URL } from '@/config/api'
 
 export default {
 
   name: 'ZbirkeView',
-
 
   data() {
     return {
@@ -153,17 +152,77 @@ export default {
       ucitavanje: true,
       greska: '',
       poruka: '',
-      dodavanjeId: null
+      dodavanjeId: null,
+      korisnik: null
     }
   },
 
+  computed: {
+
+    // =====================================================
+    // PROVJERA JE LI PRIJAVLJEN STUDENT
+    // =====================================================
+
+    jeStudent() {
+
+      if (!this.korisnik) {
+        return false
+      }
+
+      const uloga = (
+        this.korisnik.uloga ||
+        this.korisnik.role ||
+        ''
+      ).toLowerCase()
+
+      return (
+        uloga === 'student' ||
+        uloga === 'učenik' ||
+        uloga === 'ucenik'
+      )
+    }
+
+  },
 
   mounted() {
+
+    this.ucitajKorisnika()
+
     this.dohvatiZbirke()
   },
 
-
   methods: {
+
+    // =====================================================
+    // UČITAJ PRIJAVLJENOG KORISNIKA
+    // =====================================================
+
+    ucitajKorisnika() {
+
+      const podaci =
+        localStorage.getItem('korisnik') ||
+        localStorage.getItem('user')
+
+      if (!podaci) {
+        this.korisnik = null
+        return
+      }
+
+      try {
+
+        this.korisnik = JSON.parse(podaci)
+
+      } catch (error) {
+
+        console.error(
+          'Greška pri učitavanju korisnika:',
+          error
+        )
+
+        this.korisnik = null
+      }
+    },
+
 
     // =====================================================
     // DOHVAT ZBIRKI
@@ -173,7 +232,6 @@ export default {
 
       this.ucitavanje = true
       this.greska = ''
-
 
       try {
 
@@ -190,10 +248,8 @@ export default {
           }
         )
 
-
         const podaci =
           await odgovor.json()
-
 
         if (!odgovor.ok) {
 
@@ -201,26 +257,20 @@ export default {
 
           this.greska =
             podaci.messages?.error ||
+            podaci.message ||
             podaci.poruka ||
             'Zbirke nije moguće dohvatiti.'
 
           return
         }
 
+        if (Array.isArray(podaci.zbirke)) {
 
-        if (
-          Array.isArray(podaci.zbirke)
-        ) {
+          this.zbirke = podaci.zbirke
 
-          this.zbirke =
-            podaci.zbirke
+        } else if (Array.isArray(podaci)) {
 
-        } else if (
-          Array.isArray(podaci)
-        ) {
-
-          this.zbirke =
-            podaci
+          this.zbirke = podaci
 
         } else {
 
@@ -234,9 +284,7 @@ export default {
           error
         )
 
-
         this.zbirke = []
-
 
         this.greska =
           'Došlo je do greške pri povezivanju s poslužiteljem.'
@@ -270,7 +318,6 @@ export default {
         return ''
       }
 
-
       if (
         putanja.startsWith('http://') ||
         putanja.startsWith('https://')
@@ -278,10 +325,8 @@ export default {
         return putanja
       }
 
-
       const backendOrigin =
         API_BASE_URL.replace(/\/api\/?$/, '')
-
 
       return `${backendOrigin}/${putanja.replace(/^\/+/, '')}`
     },
@@ -293,6 +338,15 @@ export default {
 
     async dodajUKosaricu(zbirka) {
 
+      // Dodatna provjera na frontendu
+      if (!this.jeStudent) {
+
+        this.greska =
+          'Dodavanje u košaricu dostupno je samo studentima.'
+
+        return
+      }
+
       if (
         !zbirka ||
         !zbirka.id
@@ -300,13 +354,11 @@ export default {
         return
       }
 
-
       this.poruka = ''
       this.greska = ''
 
       this.dodavanjeId =
         Number(zbirka.id)
-
 
       try {
 
@@ -318,27 +370,19 @@ export default {
             credentials: 'include',
 
             headers: {
-              'Content-Type':
-                'application/json',
-
-              Accept:
-                'application/json'
+              'Content-Type': 'application/json',
+              Accept: 'application/json'
             },
 
             body: JSON.stringify({
-              zbirka_id:
-                zbirka.id,
-
-              kolicina:
-                1
+              zbirka_id: zbirka.id,
+              kolicina: 1
             })
           }
         )
 
-
         const podaci =
           await odgovor.json()
-
 
         if (
           odgovor.ok &&
@@ -349,17 +393,15 @@ export default {
             podaci.poruka ||
             'Zbirka je dodana u košaricu.'
 
-
           setTimeout(() => {
-
             this.poruka = ''
-
           }, 3000)
 
         } else {
 
           this.greska =
             podaci.messages?.error ||
+            podaci.message ||
             podaci.poruka ||
             'Zbirku nije moguće dodati u košaricu.'
         }
@@ -370,7 +412,6 @@ export default {
           'Greška pri dodavanju u košaricu:',
           error
         )
-
 
         this.greska =
           'Došlo je do greške pri dodavanju u košaricu.'
@@ -393,7 +434,6 @@ export default {
   background-color: #f4f6f8;
   padding: 20px;
 }
-
 
 .placeholder-slika {
   height: 220px;
