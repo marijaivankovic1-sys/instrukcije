@@ -1,12 +1,14 @@
 ```vue
 <template>
   <div class="container my-5">
+    <!-- Dokumentacija -->
     <div class="card shadow-sm p-4 mb-4 bg-light border-0">
       <div class="row align-items-center">
         <div class="col-md-8">
           <h3>Službena dokumentacija</h3>
           <p class="text-muted mb-0">
-            Preuzmite PDF dokument s potpunom specifikacijom projekta.
+            Preuzmite PDF dokument s detaljnim opisom vizije, ciljeva,
+            korisnika i funkcionalnosti projekta.
           </p>
         </div>
 
@@ -23,58 +25,93 @@
       </div>
     </div>
 
-    <h1 class="mb-4">Vizija projekta - Sustav za instrukcije</h1>
+    <h1 class="mb-4">Vizija projekta - PLUS I MINUS</h1>
 
+    <!-- Cilj -->
     <h3 class="text-secondary">Cilj projekta</h3>
     <p>
-      Cilj ovog projekta je izrada moderne web aplikacije koja omogućuje
-      jednostavno upravljanje, zakazivanje i rezervaciju instrukcija.
-      Aplikacija povezuje studente, instruktore i administratore u jedinstven
-      sustav koji olakšava proces pronalaska slobodnih termina, prijave na
-      instrukcije i administrativnog nadzora.
+      Cilj projekta PLUS I MINUS je izrada pregledne i funkcionalne web
+      aplikacije koja olakšava organizaciju instrukcija. Sustav povezuje
+      studente i tutore te omogućuje upravljanje predmetima, terminima,
+      rezervacijama i ostalim podacima potrebnim za organizaciju instrukcija.
     </p>
 
-    <h3 class="mt-4">Svrha i ciljevi</h3>
+    <!-- Svrha -->
+    <h3 class="mt-4">Svrha sustava</h3>
+    <p>
+      Aplikacija objedinjuje podatke potrebne za organizaciju instrukcija na
+      jednom mjestu. Studentima omogućuje jednostavnije pronalaženje i
+      rezerviranje odgovarajućih termina, tutorima upravljanje terminima i
+      zahtjevima za rezervaciju, a administrativnim korisnicima upravljanje
+      sustavom u skladu s dodijeljenim ovlastima.
+    </p>
+
+    <!-- Funkcionalnosti -->
+    <h3 class="mt-4">Glavne funkcionalnosti</h3>
     <ul>
       <li>
-        Omogućiti studentima jednostavno pretraživanje i rezervaciju termina
-        instrukcija prema predmetima.
+        Registracija, prijava i odjava korisnika.
       </li>
 
       <li>
-        Povezati instruktore i studente kroz sustav upravljanja zahtjevima i
-        radnim kalendarom.
+        Pregled predmeta i dostupnih termina za instrukcije.
       </li>
 
       <li>
-        Podržati napredne funkcionalnosti poput WYSIWYG uređivanja napomena,
-        priloga te ispisa.
+        Slanje i obrada zahtjeva za rezervaciju termina.
       </li>
 
       <li>
-        Omogućiti administratorima potpun nadzor nad korisnicima, ulogama,
-        predmetima i terminima.
+        Dodavanje napomena i privitaka uz rezervacije.
+      </li>
+
+      <li>
+        Upravljanje predmetima, terminima, korisnicima i rezervacijama.
+      </li>
+
+      <li>
+        Rad sa zbirkama, košaricom i recenzijama.
+      </li>
+
+      <li>
+        Upravljanje korisničkim ulogama i dozvolama.
       </li>
     </ul>
 
+    <!-- Korisničke uloge -->
     <h3 class="mt-4">Korisničke uloge</h3>
 
     <p>
-      <strong>Administrator:</strong>
-      Upravlja korisnicima, dodaje/uređuje predmete i ima uvid u cijeli sustav.
-    </p>
-
-    <p>
-      <strong>Instruktor:</strong>
-      Unosi slobodne termine, definira cijene i upravlja pristiglim zahtjevima
-      za rezervacije.
-    </p>
-
-    <p>
       <strong>Student:</strong>
-      Pregledava termine, šalje zahtjeve za rezervaciju s napomenama i
-      privitcima te prati status svojih rezervacija.
+      Pregledava dostupne termine, šalje zahtjeve za rezervaciju s napomenama
+      i privitcima te prati status svojih rezervacija.
+    </p>
+
+    <p>
+      <strong>Tutor:</strong>
+      Upravlja svojim terminima i predmetima te pregledava i obrađuje
+      pristigle zahtjeve za rezervaciju.
+    </p>
+
+    <p>
+      <strong>Administrator:</strong>
+      Pristupa administrativnom dijelu aplikacije i upravlja podacima sustava
+      u skladu s dodijeljenim dozvolama.
+    </p>
+
+    <p>
+      <strong>Super Administrator:</strong>
+      Ima najvišu razinu administrativnih ovlasti te pristup posebno
+      zaštićenim funkcionalnostima, uključujući upravljanje korisnicima,
+      ulogama i dozvolama.
+    </p>
+
+    <!-- Tehnologije -->
+    <h3 class="mt-4">Tehnologije</h3>
+    <p>
+      Aplikacija je razvijena korištenjem Vue.js-a i Vitea za korisničko
+      sučelje, Laravel PHP frameworka za poslužiteljski dio te MySQL baze
+      podataka. Frontend i backend komuniciraju putem API zahtjeva.
     </p>
   </div>
 </template>
-```
